@@ -75,6 +75,10 @@ enum {
     KEY_VOLUME_UP,
     KEY_VOLUME_DOWN,
     KEY_MUTE,
+    KEY_RECORD,
+    KEY_TOOLS,
+    KEY_FAVORITES,
+     /* Special internal/virtual keys */
     /* Special internal/virtual keys */
     KEY_CLOSE_WIN = KEY_BASE + 0x1000,
 };

@@ -78,6 +78,9 @@
 
 #define IS_STREAMTYPE(t) (mpctx->stream && mpctx->stream->type == STREAMTYPE_##t)
 
+int shot_true = 1;
+extern float start_volume;
+
 static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
 {
     //remove the borders, if any, and rescale to the range [0,1],[0,1]
@@ -2359,6 +2362,19 @@ static struct {
 };
 
 
+static float prev_position = 0;
+void output_current_position(MPContext *mpctx) {
+  float v = mpctx->sh_video ? mpctx->sh_video->pts:
+    playing_audio_pts(mpctx->sh_audio, mpctx->d_audio,
+		      mpctx->audio_out);
+  // Output the position not more than once per second.
+  if (v - prev_position > 1) {
+    fprintf(stderr, "@p %f %s\n", v, get_metadata(META_NAME));
+    prev_position = v;
+  }
+}
+
+
 /// Handle commands that set a property.
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
@@ -2468,6 +2484,8 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 ///@}
+
+static audio_sink = 2;
 
 static void remove_subtitle_range(MPContext *mpctx, int start, int count)
 {
@@ -2769,6 +2787,42 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mp_cmd_free(cmd);
                 exit_player_with_rc(EXIT_QUIT, rc);
             }
+
+        case MP_CMD_RECORD:
+        case MP_CMD_FAVORITES:
+	  audio_sink++;
+	  if (audio_sink > 2)
+	    audio_sink = 0;
+	  if (audio_sink == 0)
+	    goto audio_tv;
+	  else if (audio_sink == 2)
+	    goto audio_phones;
+	  else
+	    goto audio_stereo;
+
+        case MP_CMD_SPEAKER_PHONES:
+	audio_phones:
+	  audio_driver_list[0] = "alsa:device=hw=2.0";
+	  audio_delay = -0.1;
+	  goto audio_cont;
+        case MP_CMD_SPEAKER_TV:
+	audio_tv:
+	  audio_driver_list[0] = "alsa:device=hw=0.8";
+	  audio_delay = 0;
+	  goto audio_cont;
+        case MP_CMD_SPEAKER_STEREO:
+	audio_stereo:
+	  audio_driver_list[0] = "alsa:device=hw=1.0";
+	  audio_delay = 0;
+
+	audio_cont:
+	  mpctx->delay = audio_delay;
+	  audio_driver_list[1] = NULL;
+	  uninit_player(INITIALIZED_AO | INITIALIZED_ACODEC);
+	  start_volume = 20;
+	  reinit_audio_chain();
+	  break;
+
         case MP_CMD_PLAY_TREE_STEP:{
                 int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
                 int force = cmd->args[1].v.i;
@@ -2853,14 +2907,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_OSD:{
                 int v = cmd->args[0].v.i;
-                int max = (term_osd
-                           && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
-                if (osd_level > max)
-                    osd_level = max;
-                if (v < 0)
-                    osd_level = (osd_level + 1) % (max + 1);
-                else
-                    osd_level = v > max ? max : v;
+		if (osd_level != MAX_OSD_LEVEL)
+		  osd_level = MAX_OSD_LEVEL;
+		else
+		  osd_level = 1;
                 /* Show OSD state when disabled, but not when an explicit
                    argument is given to the OSD command, i.e. in slave mode. */
                 if (v == -1 && osd_level <= 1)
@@ -2937,21 +2987,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 }
                 brk_cmd = 1;
             }
-            break;
-
-        case MP_CMD_STOP:
-#ifdef CONFIG_GUI
-            // playtree_iter isn't used by the GUI
-            if (use_gui)
-                gui(GUI_RUN_COMMAND, (void *)MP_CMD_STOP);
-            else
-#endif
-            // Go back to the starting point.
-            while (play_tree_iter_up_step
-                   (mpctx->playtree_iter, 0, 1) != PLAY_TREE_ITER_END)
-                /* NOP */ ;
-            mpctx->eof = PT_STOP;
-            brk_cmd = 1;
             break;
 
         case MP_CMD_OSD_SHOW_PROGRESSION:{
@@ -3200,12 +3235,23 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         case MP_CMD_SCREENSHOT:
             if (vo_config_count) {
-                mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
-                if (CONTROL_OK !=
-                    ((vf_instance_t *) sh_video->vfilter)->
-                    control(sh_video->vfilter, VFCTRL_SCREENSHOT,
-                            &cmd->args[0].v.i))
-                    mp_msg(MSGT_CPLAYER, MSGL_INFO, "failed (forgot -vf screenshot?)\n");
+	      printf("Taking a shot...\n");
+	      mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
+	      if (CONTROL_OK !=
+		  ((vf_instance_t *) sh_video->vfilter)->
+		  control(sh_video->vfilter, VFCTRL_SCREENSHOT, (void*)0))
+		mp_msg(MSGT_CPLAYER, MSGL_INFO, "failed (forgot -vf screenshot?)\n");
+            }
+            break;
+
+        case MP_CMD_STOP:
+            if (vo_config_count) {
+	      printf("Taking continuous shot...\n");
+	      mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
+	      if (CONTROL_OK !=
+		  ((vf_instance_t *) sh_video->vfilter)->
+		  control(sh_video->vfilter, VFCTRL_SCREENSHOT, &shot_true))
+		mp_msg(MSGT_CPLAYER, MSGL_INFO, "failed (forgot -vf screenshot?)\n");
             }
             break;
 

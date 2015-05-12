@@ -85,8 +85,13 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SPEED_MULT, "speed_mult", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_SPEED_SET, "speed_set", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEAKER_PHONES, "speaker_phones", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEAKER_TV, "speaker_tv", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEAKER_STEREO, "speaker_stereo", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_STOP, "stop", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
+  { MP_CMD_RECORD, "record", 0, { {-1,{0}} } },
+  { MP_CMD_FAVORITES, "record", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step",1,  { { MP_CMD_ARG_INT,{0} }, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
@@ -169,7 +174,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_FILE_FILTER, "file_filter", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}}},
   { MP_CMD_VO_ROOTWIN, "vo_rootwin", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_VO_BORDER, "vo_border", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
-  { MP_CMD_SCREENSHOT, "screenshot", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SCREENSHOT, "screenshot", 1, { { MP_CMD_ARG_INT,{0} }, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_PANSCAN, "panscan",1,  { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SWITCH_VSYNC, "switch_vsync", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_LOADFILE, "loadfile", 1, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
@@ -363,6 +368,7 @@ static const mp_key_name_t key_names[] = {
   { KEY_VOLUME_UP, "VOLUME_UP" },
   { KEY_VOLUME_DOWN, "VOLUME_DOWN" },
   { KEY_MUTE, "MUTE" },
+  { KEY_TOOLS, "TOOLS" },
 
   // These are kept for backward compatibility
   { KEY_PAUSE, "XF86_PAUSE" },
@@ -372,6 +378,8 @@ static const mp_key_name_t key_names[] = {
 
   { KEY_CLOSE_WIN, "CLOSE_WIN" },
 
+  { KEY_RECORD, "RECORD" },
+  { KEY_FAVORITES, "RECORD" },
   { 0, NULL }
 };
 
@@ -395,13 +403,13 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_KP4, 0 }, "dvdnav left" },   // left
   { { KEY_KP6, 0 }, "dvdnav right" },   // right
   { { KEY_KP5, 0 }, "dvdnav menu" },   // menu
-  { { KEY_KPENTER, 0 }, "dvdnav select" },   // select
+  /* { { KEY_KPENTER, 0 }, "dvdnav select" }, */  // select
   { { MOUSE_BTN0, 0 }, "dvdnav mouse" },   //select
   { { KEY_KP7, 0 }, "dvdnav prev" },   // previous menu
 #endif
 
-  { { KEY_RIGHT, 0 }, "seek 10" },
-  { {  KEY_LEFT, 0 }, "seek -10" },
+  { { KEY_RIGHT, 0 }, "seek 5" },
+  { {  KEY_LEFT, 0 }, "seek -5" },
   { {  KEY_UP, 0 }, "seek 60" },
   { {  KEY_DOWN, 0 }, "seek -60" },
   { {  KEY_PAGE_UP, 0 }, "seek 600" },
@@ -414,6 +422,9 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { '}', 0 }, "speed_mult 2.0" },
   { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
   { { 'q', 0 }, "quit" },
+  { { KEY_F+6, 0 }, "speaker_phones" },
+  { { KEY_F+7, 0 }, "speaker_tv" },
+  { { KEY_F+8, 0 }, "speaker_stereo" },
   { { KEY_ESC, 0 }, "quit" },
   { { 'p', 0 }, "pause" },
   { { ' ', 0 }, "pause" },
@@ -421,7 +432,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_HOME, 0 }, "pt_up_step 1" },
   { { KEY_END, 0 }, "pt_up_step -1" },
   { { '>', 0 }, "pt_step 1" },
-  { { KEY_ENTER, 0 }, "pt_step 1 1" },
+  /*  { { KEY_ENTER, 0 }, "pt_step 1 1" }, */
   { { '<', 0 }, "pt_step -1" },
   { { KEY_INS, 0 }, "alt_src_step 1" },
   { { KEY_DEL, 0 }, "alt_src_step -1" },
@@ -458,7 +469,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { 'F', 0 }, "forced_subs_only" },
   { { '#', 0 }, "switch_audio" },
   { { '_', 0 }, "step_property switch_video" },
-  { { KEY_TAB, 0 }, "step_property switch_program" },
+  { { KEY_TAB, 0 }, "screenshot 1" },
   { { 'i', 0 }, "edl_mark" },
 #ifdef CONFIG_TV
   { { 'h', 0 }, "tv_step_channel 1" },
@@ -494,7 +505,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { 'T', 0 }, "vo_ontop" },
   { { 'f', 0 }, "vo_fullscreen" },
   { { 'c', 0 }, "capturing" },
-  { { 's', 0 }, "screenshot 0" },
+  { { 's', 0 }, "screenshot 1" },
   { { 'S', 0 }, "screenshot 1" },
   { { 'w', 0 }, "panscan -0.1" },
   { { 'e', 0 }, "panscan +0.1" },
@@ -504,7 +515,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_PLAY, 0 }, "pause" },
   { { KEY_PAUSE, 0 }, "pause" },
   { { KEY_PLAYPAUSE, 0 }, "pause" },
-  { { KEY_STOP, 0 }, "quit" },
+  { { KEY_STOP, 0 }, "stop" },
   { { KEY_FORWARD, 0 }, "seek 60" },
   { { KEY_REWIND, 0 }, "seek -60" },
   { { KEY_NEXT, 0 }, "pt_step 1" },
@@ -512,6 +523,9 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_VOLUME_UP, 0 }, "volume 1" },
   { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
   { { KEY_MUTE, 0 }, "mute" },
+  { { KEY_TOOLS, 0 }, "screenshot 1" },
+  { { KEY_RECORD, 0 }, "record" },
+  { { KEY_FAVORITES, 0 }, "record" },
 
   { { KEY_CLOSE_WIN, 0 }, "quit" },
 

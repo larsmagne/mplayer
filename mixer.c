@@ -68,9 +68,10 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
   if(mixer->audio_out){
     if(soft_vol ||
         CONTROL_OK != mixer->audio_out->control(AOCONTROL_SET_VOLUME,&vol)) {
-      if (!mixer->afilter)
+      if (!mixer->afilter) {
+	mp_msg(MSGT_GLOBAL, MSGL_INFO, "No afilter\n");
         return;
-      else {
+      } else {
         // af_volume uses values in dB
         float db_vals[AF_NCH];
         int i;

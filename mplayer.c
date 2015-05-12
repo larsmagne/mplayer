@@ -764,10 +764,6 @@ void exit_player_with_rc(enum exit_reason how, int rc)
     }
     mp_msg(MSGT_CPLAYER, MSGL_DBG2, "max framesize was %d bytes\n", max_framesize);
 
-    // must be last since e.g. mp_msg uses option values
-    // that will be freed by this.
-    if (mconfig)
-        m_config_free(mconfig);
     mconfig = NULL;
 
     exit(rc);
@@ -1709,6 +1705,8 @@ void reinit_audio_chain(void)
     }
     mpctx->mixer.audio_out = mpctx->audio_out;
     mpctx->mixer.volstep   = volstep;
+    if (start_volume >= 0)
+      mixer_setvolume(&mpctx->mixer, start_volume, start_volume);
     return;
 
 init_error:
@@ -2768,6 +2766,8 @@ static int seek(MPContext *mpctx, double amount, int style)
     current_module = NULL;
     return 0;
 }
+
+void output_current_position(MPContext *mpctx);
 
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object
  * file for some tools to link against. */
@@ -3972,6 +3972,7 @@ goto_enable_cache:
             {
                 mp_cmd_t *cmd;
                 int brk_cmd = 0;
+		output_current_position(mpctx);
                 while (!brk_cmd && (cmd = mp_input_get_cmd(0, 0, 0)) != NULL) {
                     brk_cmd = run_command(mpctx, cmd);
                     if (cmd->id == MP_CMD_EDL_LOADFILE) {

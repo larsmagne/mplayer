@@ -459,10 +459,6 @@ int gui(int what, void *data)
             uiEvent(evPrev, 0);
             break;
 
-        case MP_CMD_STOP:
-            uiEvent(evStop, 0);
-            break;
-
         case MP_CMD_QUIT:
             uiEvent(evExit, 0);
             break;
