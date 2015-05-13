@@ -2767,7 +2767,17 @@ static int seek(MPContext *mpctx, double amount, int style)
     return 0;
 }
 
-void output_current_position(MPContext *mpctx);
+static float prev_position = 0;
+void output_current_position(MPContext *mpctx) {
+  float v = mpctx->sh_video ? mpctx->sh_video->pts:
+    playing_audio_pts(mpctx->sh_audio, mpctx->d_audio,
+		      mpctx->audio_out);
+  // Output the position not more than once per second.
+  if (v - prev_position > 1) {
+    fprintf(stderr, "@p %f %s\n", v, get_metadata(META_NAME));
+    prev_position = v;
+  }
+}
 
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object
  * file for some tools to link against. */

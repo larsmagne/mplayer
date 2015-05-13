@@ -2362,19 +2362,6 @@ static struct {
 };
 
 
-static float prev_position = 0;
-void output_current_position(MPContext *mpctx) {
-  float v = mpctx->sh_video ? mpctx->sh_video->pts:
-    playing_audio_pts(mpctx->sh_audio, mpctx->d_audio,
-		      mpctx->audio_out);
-  // Output the position not more than once per second.
-  if (v - prev_position > 1) {
-    fprintf(stderr, "@p %f %s\n", v, get_metadata(META_NAME));
-    prev_position = v;
-  }
-}
-
-
 /// Handle commands that set a property.
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
