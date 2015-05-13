@@ -55,5 +55,4 @@ TOOLS/movinfo
 TOOLS/netstream
 TOOLS/subrip
 TOOLS/vivodump
-vidix/pci_*.[ch]
 vidix/dhahelperwin/dhahelper.sys
