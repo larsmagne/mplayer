@@ -88,7 +88,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SPEAKER_PHONES, "speaker_phones", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SPEAKER_TV, "speaker_tv", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SPEAKER_STEREO, "speaker_stereo", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  { MP_CMD_STOP, "stop", 0, { {-1,{0}} } },
+  { MP_CMD_PLAY, "stop", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_RECORD, "record", 0, { {-1,{0}} } },
   { MP_CMD_FAVORITES, "record", 0, { {-1,{0}} } },

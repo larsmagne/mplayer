@@ -3231,7 +3231,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
             break;
 
-        case MP_CMD_STOP:
+        case MP_CMD_PLAY:
             if (vo_config_count) {
 	      printf("Taking continuous shot...\n");
 	      mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
