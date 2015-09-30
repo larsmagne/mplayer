@@ -570,6 +570,7 @@ static const struct mp_keymap keysym_map[] = {
     {XF86XK_AudioMute, KEY_MUTE}, {XF86XK_AudioLowerVolume, KEY_VOLUME_DOWN}, {XF86XK_AudioRaiseVolume, KEY_VOLUME_UP},
     {XF86XK_AudioRecord, KEY_RECORD},
     {XF86XK_Tools, KEY_TOOLS},
+    {XF86XK_HomePage, KEY_HOMEPAGE},
     {XF86XK_Favorites, KEY_RECORD},
 #endif
     {0, 0}

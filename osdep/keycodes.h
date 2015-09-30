@@ -77,6 +77,7 @@ enum {
     KEY_MUTE,
     KEY_RECORD,
     KEY_TOOLS,
+    KEY_HOMEPAGE,
     KEY_FAVORITES,
      /* Special internal/virtual keys */
     /* Special internal/virtual keys */

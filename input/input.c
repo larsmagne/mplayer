@@ -369,6 +369,7 @@ static const mp_key_name_t key_names[] = {
   { KEY_VOLUME_DOWN, "VOLUME_DOWN" },
   { KEY_MUTE, "MUTE" },
   { KEY_TOOLS, "TOOLS" },
+  { KEY_HOMEPAGE, "HOMEPAGE" },
 
   // These are kept for backward compatibility
   { KEY_PAUSE, "XF86_PAUSE" },
@@ -524,6 +525,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
   { { KEY_MUTE, 0 }, "mute" },
   { { KEY_TOOLS, 0 }, "screenshot 1" },
+  { { KEY_HOMEPAGE, 0 }, "screenshot 1" },
   { { KEY_RECORD, 0 }, "record" },
   { { KEY_FAVORITES, 0 }, "record" },
 
