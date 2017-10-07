@@ -38,6 +38,8 @@
 #include "libswscale/swscale.h"
 #include "libavcodec/avcodec.h"
 
+char* screenshot_prefix = "shot";
+
 struct vf_priv_s {
     int frameno;
     char fname[PATH_MAX];
@@ -137,7 +139,8 @@ static int fexists(char *fname)
 static void gen_fname(struct vf_priv_s* priv)
 {
     do {
-        snprintf(priv->fname, sizeof(priv->fname), "%s%04d.png", priv->prefix, ++priv->frameno);
+        snprintf(priv->fname, sizeof(priv->fname), "%s%04d.png", screenshot_prefix,
+		 ++priv->frameno);
     } while (fexists(priv->fname) && priv->frameno < 100000);
     if (fexists(priv->fname)) {
         priv->fname[0] = '\0';

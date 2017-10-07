@@ -79,6 +79,10 @@
 #define IS_STREAMTYPE(t) (mpctx->stream && mpctx->stream->type == STREAMTYPE_##t)
 
 int shot_true = 1;
+int animation_running = 0;
+int animation_number = 0;
+extern char* screenshot_prefix;
+
 extern float start_volume;
 
 static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
@@ -3223,6 +3227,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         case MP_CMD_SCREENSHOT:
             if (vo_config_count) {
 	      printf("Taking a shot...\n");
+	      screenshot_prefix = "shot";
 	      mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
 	      if (CONTROL_OK !=
 		  ((vf_instance_t *) sh_video->vfilter)->
@@ -3231,15 +3236,24 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
             break;
 
-        case MP_CMD_PLAY:
+        case MP_CMD_ANIMATE:
             if (vo_config_count) {
-	      printf("Taking continuous shot...\n");
+	      if (animation_running) {
+		printf("Stopping continuous shot...\n");
+		animation_running = 0;
+	      } else {
+		animation_running = 1;
+		animation_number++;
+		screenshot_prefix = malloc(20);
+		sprintf(screenshot_prefix, "anim%02d-", animation_number);
+		printf("Taking continuous shot...\n");
+	      }
 	      mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
 	      if (CONTROL_OK !=
 		  ((vf_instance_t *) sh_video->vfilter)->
 		  control(sh_video->vfilter, VFCTRL_SCREENSHOT, &shot_true))
 		mp_msg(MSGT_CPLAYER, MSGL_INFO, "failed (forgot -vf screenshot?)\n");
-            }
+	    }
             break;
 
         case MP_CMD_VF_CHANGE_RECTANGLE:

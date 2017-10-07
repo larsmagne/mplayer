@@ -90,6 +90,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SPEAKER_STEREO, "speaker_stereo", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY, "stop", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
+  { MP_CMD_ANIMATE, "animate", 0, { {-1,{0}} } },
   { MP_CMD_RECORD, "record", 0, { {-1,{0}} } },
   { MP_CMD_FAVORITES, "record", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
@@ -513,7 +514,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
 
   { { KEY_POWER, 0 }, "quit" },
   { { KEY_MENU, 0 }, "osd" },
-  { { KEY_PLAY, 0 }, "pause" },
+  { { KEY_PLAY, 0 }, "animate" },
   //{ { KEY_PAUSE, 0 }, "pause" },
   //{ { KEY_PLAYPAUSE, 0 }, "pause" },
   { { KEY_STOP, 0 }, "stop" },

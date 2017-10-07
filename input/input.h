@@ -171,6 +171,7 @@ typedef enum {
 
   MP_CMD_RECORD,
   MP_CMD_FAVORITES,
+  MP_CMD_ANIMATE,
 } mp_command_type;
 
 // The arg types
