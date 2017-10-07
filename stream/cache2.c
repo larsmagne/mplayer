@@ -517,10 +517,12 @@ int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t seek_l
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%"PRId64"  eof:%d  \n",
 	s->min_filepos,s->read_filepos,s->max_filepos,min,s->eof);
     while(s->read_filepos<s->min_filepos || s->max_filepos-s->read_filepos<min){
+      /*
 	mp_msg(MSGT_CACHE,MSGL_STATUS,MSGTR_CacheFill,
-	    100.0*(float)(s->max_filepos-s->read_filepos)/(float)(s->buffer_size),
-	    s->max_filepos-s->read_filepos
+	100.0*(float)(s->max_filepos-s->read_filepos)/(float)(s->buffer_size),
+	s->max_filepos-s->read_filepos
 	);
+      */
 	if(s->eof) break; // file is smaller than prefill size
 	if(stream_check_interrupt(PREFILL_SLEEP_TIME)) {
 	  res = 0;
